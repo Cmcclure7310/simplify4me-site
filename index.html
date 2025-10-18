@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Simplify 4 Me — Text Simplifier & Reader Assist</title>
+  <meta name="description" content="Instantly simplify words & phrases on any webpage. Create custom rules, auto‑simplify on allowed sites, and hover‑undo. Works offline."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="antialiased bg-white">
+  <header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-slate-200">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="#top" class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-xl bg-indigo-600"></div>
+        <span class="font-semibold">Simplify 4 Me</span>
+      </a>
+      <a href="https://chromewebstore.google.com/detail/REPLACE_WITH_EXTENSION_ID" class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-white font-semibold shadow-md" rel="noopener" target="_blank">
+        Add to Chrome
+      </a>
+    </div>
+  </header>
+  <main class="max-w-5xl mx-auto px-4 py-16">
+    <h1 class="text-4xl font-extrabold mb-4">Read faster. Understand more. <span class="text-indigo-700">Simplify text instantly.</span></h1>
+    <p class="text-slate-600 text-lg mb-6">Highlight text on any website and instantly replace it with clearer, simpler language. Works offline, supports custom rules, and offers optional dictionary lookups.</p>
+    <a href="https://chromewebstore.google.com/detail/REPLACE_WITH_EXTENSION_ID" class="inline-block rounded-xl bg-indigo-600 px-5 py-3 text-white font-semibold shadow-md" target="_blank" rel="noopener">Add to Chrome — Free</a>
+  </main>
+  <footer class="border-t border-slate-200 py-6 text-center text-slate-500 text-sm">
+    © <span id="year"></span> Simplify 4 Me — A solo‑developer project
+  </footer>
+  <script>document.getElementById('year').textContent = new Date().getFullYear()</script>
+</body>
+</html>
