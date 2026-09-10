@@ -1,0 +1,140 @@
+name: Build Simplify 4 Me 3.0 Release
+
+on:
+  push:
+    branches: [simplify4me-3.0-release]
+    paths:
+      - 'release/simplify4me-3.0/**'
+      - '.github/workflows/simplify4me-3-release.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test-package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: release/simplify4me-3.0
+
+    steps:
+      - name: Checkout release branch
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: release/simplify4me-3.0/package-lock.json
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pillow
+          npm install --ignore-scripts
+
+      - name: Install Chromium for integration tests
+        run: npx playwright install --with-deps chromium
+
+      - name: Generate icons and Chrome Web Store artwork
+        run: python build/generate_assets.py
+
+      - name: JavaScript syntax audit
+        run: |
+          mkdir -p dist
+          set -o pipefail
+          find extension tests -type f \( -name '*.js' -o -name '*.mjs' \) -print0 | xargs -0 -n1 node --check | tee dist/javascript-syntax.txt
+          echo 'PASS JavaScript syntax audit' | tee -a dist/javascript-syntax.txt
+
+      - name: Unit test local simplification engine
+        run: |
+          set -o pipefail
+          npm run test:engine | tee dist/engine-test.txt
+
+      - name: Chromium integration test
+        run: |
+          set -o pipefail
+          npm run test:browser | tee dist/browser-test.txt
+
+      - name: Package Chrome Web Store ZIP
+        run: |
+          rm -f dist/Simplify4Me-3.0.0-Chrome-Web-Store.zip
+          (cd extension && zip -q -r ../dist/Simplify4Me-3.0.0-Chrome-Web-Store.zip . -x '*.DS_Store' '__MACOSX/*')
+
+      - name: Package website and store artwork
+        run: |
+          rm -f dist/Simplify4Me-3.0.0-Website.zip dist/Simplify4Me-3.0.0-Store-Assets.zip
+          (cd website && zip -q -r ../dist/Simplify4Me-3.0.0-Website.zip . -x '*.DS_Store')
+          (cd dist/store-assets && zip -q -r ../Simplify4Me-3.0.0-Store-Assets.zip .)
+          mkdir -p dist/release-docs
+          cp docs/*.md dist/release-docs/
+
+      - name: Static security, policy, dimension, and ZIP audit
+        run: |
+          set -o pipefail
+          python tests/static_audit.py | tee dist/static-audit-console.txt
+
+      - name: Write tested release report
+        env:
+          RUN_ID: ${{ github.run_id }}
+          RUN_NUMBER: ${{ github.run_number }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          cat > dist/TEST_REPORT.md <<EOF
+          # Simplify 4 Me 3.0.0 — Test Report
+
+          **Release commit:** \`$COMMIT_SHA\`  
+          **GitHub Actions run:** $RUN_ID (run #$RUN_NUMBER)  
+          **Platform:** GitHub-hosted Ubuntu runner, Node 22, Python 3.12, Playwright Chromium
+
+          ## Automated results
+          **PASS — JavaScript syntax audit.** Every extension/test JavaScript file passed \`node --check\`.
+
+          **PASS — Simplification engine unit tests.** Tested common formal-language replacement, strength gating, capitalization, custom-rule priority, URL/email protection, no-op behavior, simple-mode punctuation behavior, Hard Words, extractive Key Points, reading-stat bounds, and input immutability.
+
+          **PASS — Chromium integration tests.** Tested a real browser DOM for highlight-to-Simplify, open Shadow DOM in test mode, Simpler output, Key Points, Hard Words, safe same-text-node Replace, exact Undo restoration, blocking the selection helper inside \`pre\`/code-style content, Quick Read creation, text-only reader rendering, Quick Read simplification, Focus Mode routing, and extension-UI isolation from page markup.
+
+          **PASS — Static security and package audit.** Validated Manifest V3, version/name/description limits, requested API permissions, required packaged files, absence of direct network APIs and remote script/style dependencies in the extension, absence of \`eval\`/\`new Function\`/remote \`importScripts\`, no inline executable extension scripts or event-handler attributes, website local assets, required release documents, store-art dimensions, extension icon dimensions, and \`manifest.json\` at the Chrome ZIP root.
+
+          ## Security architecture reviewed
+          - Core reading analysis has no developer cloud backend or network request.
+          - No remote JavaScript is loaded by the extension.
+          - Webpage content is rendered into Quick Read with text nodes, not copied as source HTML.
+          - Selection helper excludes editable controls, scripts/styles, code/preformatted content, SVG, canvas, and iframes.
+          - Replace is restricted to a single non-editable text node and supplies a short undo window.
+          - The UI is isolated in Shadow DOM to reduce host-page style collisions.
+          - Complexity Lens uses browser Range/Custom Highlight APIs where supported instead of rewriting page text.
+
+          ## Manual limitations / final smoke test
+          Automated testing cannot reproduce every live website, browser extension conflict, operating-system voice, enterprise Chrome policy, or Chrome Web Store review environment. Read Aloud voice availability and whether a platform voice itself uses a local or provider service are controlled by Chrome/OS, not Simplify 4 Me.
+
+          The historical Simplify 4 Me 2.1.2 ZIP was not present inside this clean CI build environment. Version 3.0 therefore includes defensive migration for common legacy keys and intentionally preserves unknown existing local-storage keys, but exact migration of every private 2.1.2 storage key cannot be claimed from CI alone.
+
+          Before Store submission, perform the included five-minute local smoke test in \`UPLOAD_CHECKLIST.md\`. This is the only manual release gate remaining.
+
+          ## Release conclusion
+          All automated release gates passed. The generated Chrome ZIP, website ZIP, and Store-assets ZIP were produced only after those tests succeeded.
+          EOF
+          cp dist/TEST_REPORT.md dist/release-docs/TEST_REPORT.md
+
+      - name: Create checksums and complete release bundle
+        run: |
+          (cd dist && sha256sum Simplify4Me-3.0.0-Chrome-Web-Store.zip Simplify4Me-3.0.0-Website.zip Simplify4Me-3.0.0-Store-Assets.zip > SHA256SUMS.txt)
+          rm -f dist/Simplify4Me-3.0.0-Complete-Release.zip
+          (cd dist && zip -q -r Simplify4Me-3.0.0-Complete-Release.zip Simplify4Me-3.0.0-Chrome-Web-Store.zip Simplify4Me-3.0.0-Website.zip Simplify4Me-3.0.0-Store-Assets.zip release-docs TEST_REPORT.md SHA256SUMS.txt static-audit.txt engine-test.txt browser-test.txt javascript-syntax.txt)
+
+      - name: Upload complete release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Simplify4Me-3.0.0-release
+          path: release/simplify4me-3.0/dist/
+          if-no-files-found: error
+          retention-days: 90
