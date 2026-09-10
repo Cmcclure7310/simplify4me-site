@@ -26,6 +26,7 @@
       "js": [
         "shared/defaults.js",
         "shared/simplify_engine.js",
+        "shared/simplify_enhancements.js",
         "content/content.js"
       ],
       "css": ["content/content.css"],
