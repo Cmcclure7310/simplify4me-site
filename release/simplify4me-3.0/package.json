@@ -1,0 +1,12 @@
+{
+  "name": "simplify4me-3-release-tests",
+  "private": true,
+  "version": "3.0.0",
+  "scripts": {
+    "test:engine": "node tests/engine.test.js",
+    "test:browser": "node tests/browser.test.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.55.0"
+  }
+}
