@@ -14,12 +14,6 @@
     settings = normalizeSettings({ ...settings, ...patch });
     await chrome.storage.local.set(patch);
     flash();
-    try {
-      const tabs = await chrome.tabs.query({});
-      for (const tab of tabs) {
-        if (tab.id && /^https?:/i.test(tab.url || '')) chrome.tabs.sendMessage(tab.id, { type: 'S4M_SETTINGS_UPDATED' }).catch(() => {});
-      }
-    } catch {}
   }
 
   function paintStrength() {
@@ -53,59 +47,107 @@
       const from = document.createElement('b'); from.textContent = rule.from;
       const arrow = document.createElement('span'); arrow.textContent = '→';
       const to = document.createElement('span'); to.textContent = rule.to;
-      const remove = document.createElement('button'); remove.type = 'button'; remove.textContent = 'Remove'; remove.setAttribute('aria-label', `Remove ${rule.from}`);
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.textContent = 'Remove';
+      remove.setAttribute('aria-label', `Remove ${rule.from}`);
       remove.addEventListener('click', async () => {
         const customRules = settings.customRules.filter((_, i) => i !== index);
-        await save({ customRules }); renderRules();
+        await save({ customRules });
+        renderRules();
       });
-      row.append(from, arrow, to, remove); root.append(row);
+      row.append(from, arrow, to, remove);
+      root.append(row);
     });
   }
 
   async function init() {
     settings = normalizeSettings(await chrome.storage.local.get(null));
-    paintStrength(); paintRanges(); renderRules();
+    paintStrength();
+    paintRanges();
+    renderRules();
     $('#readerTheme').value = settings.readerTheme;
     $('#selectionBubble').checked = settings.selectionBubble;
     $('#showStats').checked = settings.showReadingStats;
   }
 
-  document.querySelectorAll('[data-strength]').forEach(button => button.addEventListener('click', async () => { await save({ strength: button.dataset.strength }); paintStrength(); }));
-  $('#readerTheme').addEventListener('change', e => save({ readerTheme: e.target.value }));
-  for (const [id, key, convert] of [
-    ['fontScale','readerFontScale',Number], ['lineHeight','readerLineHeight',Number], ['readerWidth','readerWidth',Number], ['ttsRate','ttsRate',Number]
-  ]) $('#'+id).addEventListener('input', async e => { await save({ [key]: convert(e.target.value) }); paintRanges(); });
-  $('#selectionBubble').addEventListener('change', e => save({ selectionBubble: e.target.checked }));
-  $('#showStats').addEventListener('change', e => save({ showReadingStats: e.target.checked }));
+  document.querySelectorAll('[data-strength]').forEach(button => button.addEventListener('click', async () => {
+    await save({ strength: button.dataset.strength });
+    paintStrength();
+  }));
 
-  $('#ruleForm').addEventListener('submit', async e => {
-    e.preventDefault();
-    const from = $('#ruleFrom').value.trim(), to = $('#ruleTo').value.trim();
+  $('#readerTheme').addEventListener('change', event => save({ readerTheme: event.target.value }));
+  for (const [id, key] of [
+    ['fontScale','readerFontScale'], ['lineHeight','readerLineHeight'], ['readerWidth','readerWidth'], ['ttsRate','ttsRate']
+  ]) {
+    $('#'+id).addEventListener('input', async event => {
+      await save({ [key]: Number(event.target.value) });
+      paintRanges();
+    });
+  }
+  $('#selectionBubble').addEventListener('change', event => save({ selectionBubble: event.target.checked }));
+  $('#showStats').addEventListener('change', event => save({ showReadingStats: event.target.checked }));
+
+  $('#ruleForm').addEventListener('submit', async event => {
+    event.preventDefault();
+    const from = $('#ruleFrom').value.trim();
+    const to = $('#ruleTo').value.trim();
     if (!from || !to) return;
-    const customRules = [...settings.customRules.filter(r => r.from.toLowerCase() !== from.toLowerCase()), { from, to }];
+    const customRules = [...settings.customRules.filter(rule => rule.from.toLowerCase() !== from.toLowerCase()), { from, to }];
     await save({ customRules });
-    e.target.reset(); renderRules();
+    event.target.reset();
+    renderRules();
   });
 
   $('#exportBtn').addEventListener('click', () => {
     const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob), a = document.createElement('a');
-    a.href = url; a.download = 'simplify4me-settings.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 500);
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = 'simplify4me-settings.json';
+    anchor.click();
+    setTimeout(() => URL.revokeObjectURL(url), 500);
   });
 
-  $('#importInput').addEventListener('change', async e => {
-    const file = e.target.files?.[0]; if (!file) return;
+  $('#importInput').addEventListener('change', async event => {
+    const file = event.target.files?.[0];
+    if (!file) return;
     try {
-      const parsed = JSON.parse(await file.text()), next = normalizeSettings(parsed);
-      await chrome.storage.local.set(next); settings = next; paintStrength(); paintRanges(); renderRules();
-      $('#readerTheme').value = settings.readerTheme; $('#selectionBubble').checked = settings.selectionBubble; $('#showStats').checked = settings.showReadingStats; flash('Imported');
-    } catch { flash('Invalid settings file'); }
-    e.target.value = '';
+      const parsed = JSON.parse(await file.text());
+      const next = normalizeSettings(parsed);
+      await chrome.storage.local.set(next);
+      settings = next;
+      paintStrength();
+      paintRanges();
+      renderRules();
+      $('#readerTheme').value = settings.readerTheme;
+      $('#selectionBubble').checked = settings.selectionBubble;
+      $('#showStats').checked = settings.showReadingStats;
+      flash('Imported');
+    } catch {
+      flash('Invalid settings file');
+    }
+    event.target.value = '';
   });
 
   $('#resetBtn').addEventListener('click', async () => {
     if (!confirm('Reset all Simplify 4 Me settings on this device?')) return;
-    await chrome.storage.local.clear(); await chrome.storage.local.set(DEFAULTS); settings = normalizeSettings(DEFAULTS); paintStrength(); paintRanges(); renderRules(); $('#readerTheme').value = settings.readerTheme; $('#selectionBubble').checked = true; $('#showStats').checked = true; flash('Reset complete');
+    await chrome.storage.local.clear();
+    await chrome.storage.local.set(DEFAULTS);
+    settings = normalizeSettings(DEFAULTS);
+    paintStrength();
+    paintRanges();
+    renderRules();
+    $('#readerTheme').value = settings.readerTheme;
+    $('#selectionBubble').checked = true;
+    $('#showStats').checked = true;
+    flash('Reset complete');
+  });
+
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== 'local') return;
+    const patch = Object.fromEntries(Object.entries(changes).map(([key, value]) => [key, value.newValue]));
+    settings = normalizeSettings({ ...settings, ...patch });
   });
 
   init();
