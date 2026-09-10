@@ -4,9 +4,8 @@
   "short_name": "Simplify 4 Me",
   "version": "3.0.0",
   "description": "Make difficult webpages easier to read with instant simplification, Quick Read, focus tools, and private on-device processing.",
-  "permissions": ["storage", "activeTab", "contextMenus"],
-  "host_permissions": ["http://*/*", "https://*/*"],
-  "background": {"service_worker": "service_worker.js"},
+  "permissions": ["storage", "contextMenus"],
+  "background": { "service_worker": "service_worker.js" },
   "action": {
     "default_title": "Simplify 4 Me",
     "default_popup": "popup/popup.html"
@@ -21,24 +20,31 @@
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'none'; base-uri 'none'"
   },
-  "content_scripts": [{
-    "matches": ["http://*/*", "https://*/*"],
-    "js": ["shared/defaults.js", "shared/simplify_engine.js", "content/content.js"],
-    "css": ["content/content.css"],
-    "run_at": "document_idle",
-    "all_frames": false
-  }],
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": [
+        "shared/defaults.js",
+        "shared/simplify_engine.js",
+        "content/content.js",
+        "content/storage_sync.js"
+      ],
+      "css": ["content/content.css"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
   "commands": {
     "simplify-selection": {
-      "suggested_key": {"default": "Alt+Shift+S"},
+      "suggested_key": { "default": "Alt+Shift+S" },
       "description": "Simplify selected text"
     },
     "quick-read": {
-      "suggested_key": {"default": "Alt+Shift+R"},
+      "suggested_key": { "default": "Alt+Shift+R" },
       "description": "Open Quick Read"
     },
     "focus-mode": {
-      "suggested_key": {"default": "Alt+Shift+F"},
+      "suggested_key": { "default": "Alt+Shift+F" },
       "description": "Toggle Focus Mode"
     }
   }
