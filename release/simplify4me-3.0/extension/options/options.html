@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Simplify 4 Me Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="../onboarding/onboarding.html"><span class="logo">S4</span><span><b>Simplify 4 Me</b><small>Reading Assistant</small></span></a>
+    <span class="version">3.0</span>
+  </header>
+  <main class="layout">
+    <aside class="intro">
+      <span class="eyebrow">SETTINGS</span>
+      <h1>Read your way.</h1>
+      <p>Everything here stays in Chrome on this device. Simplify 4 Me has no account and no cloud AI.</p>
+      <div class="shortcut-card"><b>Keyboard shortcuts</b><span>Alt + Shift + S — Simplify</span><span>Alt + Shift + R — Quick Read</span><span>Alt + Shift + F — Focus</span></div>
+    </aside>
+    <section class="stack">
+      <section class="card">
+        <div class="card-head"><div><span class="eyebrow">SIMPLIFICATION</span><h2>Default reading level</h2></div><span id="saved" class="saved" role="status" aria-live="polite"></span></div>
+        <div class="choice-grid" id="strengthChoices">
+          <button data-strength="light"><b>Light</b><span>Keep the writer's style; simplify obvious jargon.</span></button>
+          <button data-strength="clear"><b>Clear</b><span>Everyday language with balanced changes.</span></button>
+          <button data-strength="simple"><b>Simple</b><span>Stronger wording changes and shorter phrasing.</span></button>
+        </div>
+      </section>
+      <section class="card">
+        <span class="eyebrow">QUICK READ</span><h2>Reading view</h2>
+        <div class="form-grid">
+          <label>Theme<select id="readerTheme"><option value="midnight">Midnight</option><option value="warm">Warm</option><option value="light">Light</option></select></label>
+          <label>Text size<input id="fontScale" type="range" min="0.85" max="1.5" step="0.05"><output id="fontScaleOut"></output></label>
+          <label>Line spacing<input id="lineHeight" type="range" min="1.35" max="2.2" step="0.05"><output id="lineHeightOut"></output></label>
+          <label>Reading width<input id="readerWidth" type="range" min="560" max="980" step="20"><output id="readerWidthOut"></output></label>
+          <label>Voice speed<input id="ttsRate" type="range" min="0.65" max="1.8" step="0.05"><output id="ttsRateOut"></output></label>
+        </div>
+      </section>
+      <section class="card">
+        <div class="card-head"><div><span class="eyebrow">MY RULES</span><h2>Your own replacements</h2><p class="sub">Add phrases you always want rewritten. Rules run before the built-in dictionary.</p></div></div>
+        <form id="ruleForm" class="rule-form"><input id="ruleFrom" maxlength="120" placeholder="Complicated word or phrase" required><span>→</span><input id="ruleTo" maxlength="120" placeholder="Simpler replacement" required><button>Add</button></form>
+        <div id="rules" class="rules"></div>
+        <div class="button-row"><button id="exportBtn" class="secondary">Export settings</button><label class="secondary file-label">Import settings<input id="importInput" type="file" accept="application/json"></label></div>
+      </section>
+      <section class="card">
+        <span class="eyebrow">BEHAVIOR</span><h2>On-page tools</h2>
+        <label class="toggle-line"><span><b>Selection bubble</b><small>Show a small Simplify button after you highlight readable text.</small></span><input id="selectionBubble" type="checkbox"></label>
+        <label class="toggle-line"><span><b>Reading stats</b><small>Show word count and estimated reading difficulty.</small></span><input id="showStats" type="checkbox"></label>
+      </section>
+      <section class="card danger"><span class="eyebrow">RESET</span><h2>Start fresh</h2><p class="sub">Removes Simplify 4 Me preferences, site choices, and custom rules from this device.</p><button id="resetBtn" class="secondary">Reset all settings</button></section>
+    </section>
+  </main>
+  <script src="../shared/defaults.js"></script><script src="options.js"></script>
+</body></html>
