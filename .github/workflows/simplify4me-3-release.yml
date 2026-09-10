@@ -11,6 +11,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: simplify4me-3-release
+  cancel-in-progress: true
+
 jobs:
   build-test-package:
     runs-on: ubuntu-latest
@@ -57,6 +61,11 @@ jobs:
           set -o pipefail
           npm run test:engine | tee dist/engine-test.txt
 
+      - name: Test fresh install and upgrade migration
+        run: |
+          set -o pipefail
+          npm run test:migration | tee dist/migration-test.txt
+
       - name: Chromium integration test
         run: |
           set -o pipefail
@@ -96,14 +105,16 @@ jobs:
           ## Automated results
           **PASS — JavaScript syntax audit.** Every extension/test JavaScript file passed \`node --check\`.
 
-          **PASS — Simplification engine unit tests.** Tested common formal-language replacement, strength gating, capitalization, custom-rule priority, URL/email protection, no-op behavior, simple-mode punctuation behavior, Hard Words, extractive Key Points, reading-stat bounds, and input immutability.
+          **PASS — Simplification engine unit tests.** Tested common formal-language replacement, three-level strength gating, capitalization, custom-rule priority, URL/email protection, version 3 grammar enhancements, no-op behavior, simple-mode punctuation behavior, Hard Words, extractive Key Points, reading-stat bounds, and input immutability.
+
+          **PASS — Fresh-install and upgrade tests.** Tested version 3 default seeding, first-install onboarding behavior, context-menu creation, migration from representative 2.x-style level/rule/site keys, preservation of unknown historical storage keys, and precedence of current version settings over legacy leftovers.
 
           **PASS — Chromium integration tests.** Tested a real browser DOM for highlight-to-Simplify, open Shadow DOM in test mode, Simpler output, Key Points, Hard Words, safe same-text-node Replace, exact Undo restoration, blocking the selection helper inside \`pre\`/code-style content, Quick Read creation, text-only reader rendering, Quick Read simplification, Focus Mode routing, and extension-UI isolation from page markup.
 
           **PASS — Static security and package audit.** Validated Manifest V3, version/name/description limits, requested API permissions, required packaged files, absence of direct network APIs and remote script/style dependencies in the extension, absence of \`eval\`/\`new Function\`/remote \`importScripts\`, no inline executable extension scripts or event-handler attributes, website local assets, required release documents, store-art dimensions, extension icon dimensions, and \`manifest.json\` at the Chrome ZIP root.
 
           ## Security architecture reviewed
-          - Core reading analysis has no developer cloud backend or network request.
+          - Core reading analysis has no developer cloud backend or direct network request.
           - No remote JavaScript is loaded by the extension.
           - Webpage content is rendered into Quick Read with text nodes, not copied as source HTML.
           - Selection helper excludes editable controls, scripts/styles, code/preformatted content, SVG, canvas, and iframes.
@@ -114,7 +125,7 @@ jobs:
           ## Manual limitations / final smoke test
           Automated testing cannot reproduce every live website, browser extension conflict, operating-system voice, enterprise Chrome policy, or Chrome Web Store review environment. Read Aloud voice availability and whether a platform voice itself uses a local or provider service are controlled by Chrome/OS, not Simplify 4 Me.
 
-          The historical Simplify 4 Me 2.1.2 ZIP was not present inside this clean CI build environment. Version 3.0 therefore includes defensive migration for common legacy keys and intentionally preserves unknown existing local-storage keys, but exact migration of every private 2.1.2 storage key cannot be claimed from CI alone.
+          The historical Simplify 4 Me 2.1.2 ZIP was not present inside this clean CI build environment. Version 3.0 therefore includes defensive migration for common legacy keys and intentionally preserves unknown existing local-storage keys. The automated migration tests validate representative historical formats, but exact migration of every private 2.1.2 storage key cannot be claimed from CI alone.
 
           Before Store submission, perform the included five-minute local smoke test in \`UPLOAD_CHECKLIST.md\`. This is the only manual release gate remaining.
 
@@ -127,7 +138,7 @@ jobs:
         run: |
           (cd dist && sha256sum Simplify4Me-3.0.0-Chrome-Web-Store.zip Simplify4Me-3.0.0-Website.zip Simplify4Me-3.0.0-Store-Assets.zip > SHA256SUMS.txt)
           rm -f dist/Simplify4Me-3.0.0-Complete-Release.zip
-          (cd dist && zip -q -r Simplify4Me-3.0.0-Complete-Release.zip Simplify4Me-3.0.0-Chrome-Web-Store.zip Simplify4Me-3.0.0-Website.zip Simplify4Me-3.0.0-Store-Assets.zip release-docs TEST_REPORT.md SHA256SUMS.txt static-audit.txt engine-test.txt browser-test.txt javascript-syntax.txt)
+          (cd dist && zip -q -r Simplify4Me-3.0.0-Complete-Release.zip Simplify4Me-3.0.0-Chrome-Web-Store.zip Simplify4Me-3.0.0-Website.zip Simplify4Me-3.0.0-Store-Assets.zip release-docs TEST_REPORT.md SHA256SUMS.txt static-audit.txt engine-test.txt migration-test.txt browser-test.txt javascript-syntax.txt)
 
       - name: Upload complete release artifact
         uses: actions/upload-artifact@v4
