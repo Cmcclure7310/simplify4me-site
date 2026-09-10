@@ -4,11 +4,14 @@ const vm = require('vm');
 const assert = require('assert');
 
 const ROOT = path.resolve(__dirname, '..');
-const enginePath = path.join(ROOT, 'extension', 'shared', 'simplify_engine.js');
-vm.runInThisContext(fs.readFileSync(enginePath, 'utf8'), { filename: enginePath });
+for (const name of ['simplify_engine.js', 'simplify_enhancements.js']) {
+  const file = path.join(ROOT, 'extension', 'shared', name);
+  vm.runInThisContext(fs.readFileSync(file, 'utf8'), { filename: file });
+}
 
 const E = globalThis.S4MEngine;
 assert(E, 'S4MEngine must be exported to globalThis');
+assert.equal(E.__enhancedV3, true, 'Version 3 enhancements must be loaded');
 
 function equal(actual, expected, message) {
   assert.strictEqual(actual, expected, message);
@@ -30,6 +33,14 @@ equal(E.simplifyText('The result is viable.', 'clear'), 'The result is workable.
 // Capitalization preservation.
 equal(E.simplifyText('UTILIZE this now.', 'clear'), 'USE this now.', 'All-caps source should keep all-caps replacement');
 equal(E.simplifyText('Utilize this now.', 'clear'), 'Use this now.', 'Title-case source should keep title case');
+
+// Version 3 grammar/vocabulary enhancement.
+const demo = E.simplifyText('Prior to the implementation of the revised procedure, personnel are required to ascertain whether the documentation is sufficient and subsequently provide assistance to individuals who require clarification.', 'clear');
+includes(demo, 'Before starting the revised procedure', 'Version 3 should simplify implementation phrasing cleanly');
+includes(demo, 'staff must find out', 'Version 3 should simplify personnel/required/ascertain');
+includes(demo, 'documents', 'Version 3 should simplify documentation');
+includes(demo, 'help people', 'Version 3 should avoid the ungrammatical phrase help to people');
+includes(demo, 'need explanation', 'Version 3 should simplify require clarification');
 
 // Custom rule priority and phrase sorting.
 equal(E.simplifyText('The Department of Extremely Complex Things will commence.', 'clear', [
@@ -54,9 +65,10 @@ includes(strong, 'workable', 'Simple mode should simplify viable');
 notIncludes(strong, ';', 'Simple mode may split a semicolon into a sentence boundary');
 
 // Hard-word definitions are local and deterministic.
-const hard = E.getHardWords('A comprehensive proposal may mitigate a detrimental outcome.', 10);
+const hard = E.getHardWords('Personnel received comprehensive documentation to mitigate a detrimental outcome.', 10);
 assert(hard.some(item => item.word === 'comprehensive' && item.simpler === 'complete'), 'Hard Words should identify comprehensive');
 assert(hard.some(item => item.word === 'mitigate' && item.simpler === 'reduce'), 'Hard Words should identify mitigate');
+assert(hard.some(item => item.word === 'personnel' && item.simpler === 'staff'), 'Hard Words should include version 3 vocabulary');
 
 // Key points are extractive: every returned point must be a source sentence.
 const source = 'The first rule is important because it protects users. The office opens at nine each morning. Staff must verify all required documents before approval. Decorative plants were moved last week. Finally, the team should report any major risk immediately.';
@@ -80,4 +92,4 @@ const before = JSON.stringify(rules);
 E.simplifyText('Utilize this.', 'clear', rules);
 equal(JSON.stringify(rules), before, 'Engine must not mutate caller custom rules');
 
-console.log('PASS engine.test.js — deterministic simplification, privacy protection, key-points extraction, hard words, and reading stats validated.');
+console.log('PASS engine.test.js — deterministic simplification, v3 grammar enhancements, privacy protection, key-points extraction, hard words, and reading stats validated.');
