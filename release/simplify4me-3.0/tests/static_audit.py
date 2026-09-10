@@ -24,17 +24,23 @@ check(len(manifest.get('name','')) <= 45, 'Manifest name is within 45 characters
 check(len(manifest.get('description','')) <= 132, 'Manifest description is within 132 characters')
 check(set(manifest.get('permissions', [])) <= {'storage','contextMenus'}, 'Only approved narrow API permissions are requested')
 check('host_permissions' not in manifest, 'No redundant host_permissions block')
-check(manifest.get('content_scripts',[{}])[0].get('matches') == ['http://*/*','https://*/*'], 'Content script scope is ordinary HTTP/HTTPS pages')
+content_scripts = manifest.get('content_scripts',[{}])[0]
+check(content_scripts.get('matches') == ['http://*/*','https://*/*'], 'Content script scope is ordinary HTTP/HTTPS pages')
 
 required = [
     'service_worker.js','popup/popup.html','popup/popup.css','popup/popup.js',
     'options/options.html','options/options.css','options/options.js',
     'onboarding/onboarding.html','onboarding/onboarding.css','onboarding/onboarding.js',
-    'content/content.js','content/content.css','shared/defaults.js','shared/simplify_engine.js',
+    'content/content.js','content/content.css','shared/defaults.js','shared/simplify_engine.js','shared/simplify_enhancements.js',
     'icons/icon16.png','icons/icon32.png','icons/icon48.png','icons/icon128.png'
 ]
 for rel in required:
     check((EXT / rel).is_file(), f'Packaged file exists: {rel}')
+
+for rel in content_scripts.get('js', []):
+    check((EXT / rel).is_file(), f'Manifest content-script JavaScript exists: {rel}')
+for rel in content_scripts.get('css', []):
+    check((EXT / rel).is_file(), f'Manifest content-script stylesheet exists: {rel}')
 
 # Security/static dependency audit of extension code only.
 text_files = list(EXT.rglob('*.js')) + list(EXT.rglob('*.html')) + list(EXT.rglob('*.css'))
@@ -101,6 +107,7 @@ if zip_path.exists():
         names = zf.namelist()
         check('manifest.json' in names, 'Chrome Web Store ZIP has manifest.json at archive root')
         check(not any(name.startswith('extension/') for name in names), 'Chrome Web Store ZIP has no extra extension/ parent folder')
+        check(all(not name.startswith('../') for name in names), 'Chrome Web Store ZIP contains no path traversal')
 
 report = DIST / 'static-audit.txt'
 report.parent.mkdir(parents=True, exist_ok=True)
