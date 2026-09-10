@@ -47,7 +47,7 @@ try {
     };
   });
 
-  await page.setContent(`<!doctype html><html lang="en"><head><style>
+  const testHtml = `<!doctype html><html lang="en"><head><style>
     body{font-family:Arial,sans-serif;margin:60px;max-width:900px;line-height:1.65}
     article{display:block} p{font-size:18px;margin:0 0 24px}
   </style></head><body>
@@ -58,16 +58,19 @@ try {
       <p>A final paragraph provides additional information so Quick Read has enough readable article content to construct a calm reading view without relying on the original page layout or executable page markup.</p>
       <pre id="unsafe">Prior to this code sample, utilize the value carefully.</pre>
     </article>
-  </body></html>`);
+  </body></html>`;
+  await page.goto('data:text/html;charset=utf-8,' + encodeURIComponent(testHtml));
 
   await page.addScriptTag({ path: path.join(EXT, 'shared', 'defaults.js') });
   await page.addScriptTag({ path: path.join(EXT, 'shared', 'simplify_engine.js') });
+  await page.addScriptTag({ path: path.join(EXT, 'shared', 'simplify_enhancements.js') });
   await page.addScriptTag({ path: path.join(EXT, 'content', 'content.js') });
+  await page.waitForTimeout(50);
 
   const shadowExists = await page.evaluate(() => Boolean(document.querySelector('#s4m-root-host')?.shadowRoot));
   assert.equal(shadowExists, true, 'Test build must expose an open ShadowRoot');
 
-  // Highlight part of a normal paragraph and verify the selection bubble appears.
+  // Highlight a normal paragraph and verify the selection bubble appears.
   await page.evaluate(() => {
     const node = document.querySelector('#target').firstChild;
     const range = document.createRange();
@@ -86,8 +89,9 @@ try {
   await page.evaluate(() => document.querySelector('#s4m-root-host').shadowRoot.querySelector('.bubble').click());
   await page.waitForTimeout(40);
   const resultText = await page.evaluate(() => document.querySelector('#s4m-root-host').shadowRoot.querySelector('.result')?.textContent || '');
-  assert.match(resultText, /Before the revised procedure starts/i, 'Result should simplify formal phrase wording');
-  assert.match(resultText, /staff must find out/i, 'Result should simplify personnel/require/ascertain wording');
+  assert.match(resultText, /Before starting the revised procedure/i, 'Result should simplify formal phrase wording');
+  assert.match(resultText, /staff must find out/i, 'Result should simplify personnel/required/ascertain wording');
+  assert.match(resultText, /help people/i, 'Result should preserve natural grammar after phrase simplification');
 
   // Key Points tab must render extractive bullets.
   await page.evaluate(() => {
@@ -104,17 +108,19 @@ try {
   });
   const hardWords = await page.evaluate(() => document.querySelector('#s4m-root-host').shadowRoot.querySelector('.words')?.innerText || '');
   assert.match(hardWords, /ascertain/i, 'Hard Words should identify ascertain');
+  assert.match(hardWords, /personnel/i, 'Hard Words should include version 3 vocabulary');
 
   // Re-open Simpler, safely replace a same-text-node selection, then undo.
   await page.evaluate(() => {
     const tabs = [...document.querySelector('#s4m-root-host').shadowRoot.querySelectorAll('.tab')];
     tabs.find(button => button.textContent === 'Simpler').click();
     const replace = [...document.querySelector('#s4m-root-host').shadowRoot.querySelectorAll('.btn')].find(button => button.textContent === 'Replace');
+    if (!replace || replace.disabled) throw new Error('Replace unexpectedly unavailable');
     replace.click();
   });
   await page.waitForTimeout(30);
   const replaced = await page.locator('#target').textContent();
-  assert.match(replaced, /^Before the revised procedure starts/i, 'Replace should modify only the selected text node');
+  assert.match(replaced, /^Before starting the revised procedure/i, 'Replace should modify only the selected text node');
   await page.evaluate(() => document.querySelector('#s4m-root-host').shadowRoot.querySelector('.toast').click());
   await page.waitForTimeout(20);
   const undone = await page.locator('#target').textContent();
@@ -122,11 +128,15 @@ try {
 
   // Unsafe code/pre text must not trigger a selection bubble.
   await page.evaluate(() => {
-    const host = document.querySelector('#s4m-root-host').shadowRoot;
-    host.querySelector('.bubble').style.display = 'none';
+    const root = document.querySelector('#s4m-root-host').shadowRoot;
+    root.querySelector('.bubble').style.display = 'none';
+    root.querySelector('.card').classList.remove('open');
     const node = document.querySelector('#unsafe').firstChild;
-    const range = document.createRange(); range.selectNodeContents(node);
-    const selection = window.getSelection(); selection.removeAllRanges(); selection.addRange(range);
+    const range = document.createRange();
+    range.selectNodeContents(node);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
     document.querySelector('#unsafe').dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
   });
   await page.waitForTimeout(80);
@@ -161,7 +171,7 @@ try {
     [...root.querySelectorAll('.readerctrl')].find(button => button.textContent === 'Simpler').click();
   });
   const readerText = await page.evaluate(() => document.querySelector('#s4m-root-host').shadowRoot.querySelector('.article').innerText);
-  assert.match(readerText, /Before the revised procedure starts/i, 'Quick Read simpler view should apply local simplification');
+  assert.match(readerText, /Before starting the revised procedure/i, 'Quick Read simpler view should apply local simplification');
 
   // Close reader and verify Focus Mode route.
   await page.evaluate(() => {
@@ -172,7 +182,7 @@ try {
   const focusOn = await page.evaluate(() => document.querySelector('#s4m-root-host').shadowRoot.querySelector('.focus-ring').classList.contains('on'));
   assert.equal(focusOn, true, 'Focus Mode should activate through the runtime route');
 
-  // Confirm source page never received extension result markup outside the isolated host.
+  // Confirm source page never received result markup outside the isolated host.
   const leakedCards = await page.evaluate(() => document.querySelectorAll('body > .card, article > .card, .s4m-card').length);
   assert.equal(leakedCards, 0, 'Extension UI should remain isolated inside its Shadow DOM host');
 
