@@ -4,6 +4,7 @@
   "version": "3.0.0",
   "scripts": {
     "test:engine": "node tests/engine.test.js",
+    "test:migration": "node tests/migration.test.js",
     "test:browser": "node tests/browser.test.mjs"
   },
   "devDependencies": {
