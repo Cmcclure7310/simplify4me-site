@@ -3,155 +3,41 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#09131d">
   <meta name="color-scheme" content="dark">
-  <meta name="theme-color" content="#0d1823">
-  <title>ClickCritter Privacy Policy</title>
   <meta name="description" content="Privacy Policy for the ClickCritter Chrome extension.">
-  <style>
-    :root {
-      --bg: #09131d;
-      --panel: #111c28;
-      --panel-2: #162231;
-      --border: #2a3a4b;
-      --text: #f3f7fb;
-      --muted: #a8bbca;
-      --accent: #42e5ef;
-      --green: #72e28a;
-      --shadow: 0 18px 50px rgba(0,0,0,.28);
-    }
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background:
-        radial-gradient(circle at 20% 0%, rgba(66,229,239,.08), transparent 34rem),
-        linear-gradient(180deg, #0b1722 0%, var(--bg) 100%);
-      color: var(--text);
-      font: 16px/1.65 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-    a { color: var(--accent); }
-    .wrap { width: min(920px, calc(100% - 32px)); margin: 0 auto; padding: 38px 0 64px; }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 22px;
-    }
-    .critter {
-      width: 46px;
-      height: 46px;
-      border-radius: 50% 50% 45% 55%;
-      background: var(--green);
-      border: 2px solid #c9ffd5;
-      position: relative;
-      box-shadow: 0 0 0 5px rgba(114,226,138,.08);
-      transform: rotate(-6deg);
-      flex: 0 0 auto;
-    }
-    .critter:before, .critter:after {
-      content: "";
-      position: absolute;
-      top: 14px;
-      width: 6px;
-      height: 8px;
-      background: #10202b;
-      border-radius: 50%;
-    }
-    .critter:before { left: 11px; }
-    .critter:after { right: 11px; }
-    .smile {
-      position: absolute;
-      left: 50%;
-      top: 26px;
-      width: 14px;
-      height: 7px;
-      border-bottom: 2px solid #10202b;
-      border-radius: 0 0 12px 12px;
-      transform: translateX(-50%);
-    }
-    .antenna {
-      position: absolute;
-      width: 2px;
-      height: 10px;
-      background: var(--accent);
-      top: -9px;
-      left: 13px;
-      transform: rotate(-24deg);
-      transform-origin: bottom;
-    }
-    .antenna:after {
-      content: "";
-      position: absolute;
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: var(--accent);
-      top: -3px;
-      left: -1.5px;
-    }
-    .brand h1 { margin: 0; font-size: clamp(1.7rem, 4vw, 2.4rem); line-height: 1.05; }
-    .tagline { margin: 4px 0 0; color: #c6eaf0; font-size: .95rem; }
-    .hero, .card {
-      background: linear-gradient(180deg, rgba(22,34,49,.96), rgba(17,28,40,.96));
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      box-shadow: var(--shadow);
-    }
-    .hero { padding: 24px; margin-bottom: 18px; }
-    .hero h2 { margin: 0 0 8px; font-size: 1.2rem; color: var(--accent); letter-spacing: .04em; text-transform: uppercase; }
-    .hero p { margin: 0; color: #dbe6ee; }
-    .meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px 16px;
-      margin-top: 14px;
-      color: var(--muted);
-      font-size: .9rem;
-    }
-    .card { padding: 22px 24px; margin-top: 16px; }
-    .card h2 { margin: 0 0 8px; font-size: 1.15rem; }
-    .card p { margin: 8px 0 0; color: #dce6ed; }
-    ul { margin: 10px 0 0 1.15rem; padding: 0; }
-    li { margin: 5px 0; color: #dce6ed; }
-    .notice {
-      border-left: 3px solid var(--green);
-      padding: 12px 14px;
-      background: rgba(114,226,138,.06);
-      border-radius: 8px;
-      margin-top: 12px;
-      color: #e8fff0;
-    }
-    footer { text-align: center; color: #8ea3b3; font-size: .84rem; padding-top: 28px; }
-    @media (max-width: 600px) {
-      .wrap { width: min(100% - 22px, 920px); padding-top: 24px; }
-      .hero, .card { border-radius: 14px; padding: 18px; }
-    }
-  </style>
+  <title>ClickCritter Privacy Policy</title>
+  <link rel="stylesheet" href="../assets/site.css">
 </head>
 <body>
-  <main class="wrap">
-    <header class="brand" aria-label="ClickCritter">
-      <div class="critter" aria-hidden="true"><span class="antenna"></span><span class="smile"></span></div>
-      <div>
-        <h1>ClickCritter</h1>
-        <p class="tagline">Your cursor has a life of its own.</p>
-      </div>
+  <header class="site-header">
+    <div class="shell nav">
+      <a class="brand" href="../" aria-label="ClickCritter home">
+        <span class="critter-mark" aria-hidden="true"><i></i></span>
+        <span>ClickCritter</span>
+      </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="../">Home</a>
+        <a href="../support/">Support</a>
+        <a class="nav-badge" href="./">Privacy</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="shell doc">
+    <header class="doc-header">
+      <div class="eyebrow">Privacy policy</div>
+      <h1>Local by design.</h1>
+      <p><strong>Version 1.0.0</strong> · Effective September 9, 2026</p>
     </header>
 
-    <section class="hero">
-      <h2>Privacy Policy</h2>
-      <p>ClickCritter is built to work locally. Cursor activity, settings, statistics, XP, levels, and achievements stay in the user's Chrome profile and are not transmitted to the developer or to third parties.</p>
-      <div class="meta"><span>Version 1.0.0</span><span>Effective September 9, 2026</span></div>
-    </section>
-
-    <section class="card">
+    <section class="doc-section">
       <h2>Plain-language summary</h2>
-      <p>ClickCritter counts mouse clicks and approximate cursor movement on ordinary webpages so it can provide cursor effects, daily/lifetime statistics, XP, levels, and achievements. Those values and the user's settings are stored only in Chrome's local extension storage (<code>chrome.storage.local</code>).</p>
-      <div class="notice">ClickCritter has no account system, analytics service, advertising SDK, tracking pixel, backend, or external API.</div>
+      <p>ClickCritter counts mouse clicks and approximate cursor movement on ordinary webpages so it can provide cursor effects, daily/lifetime statistics, XP, levels, and achievements. Those values and the user's settings are stored only in Chrome's local extension storage (<code>chrome.storage.local</code>). ClickCritter does not send this activity to the developer or to any third party.</p>
+      <p>ClickCritter has no account system, analytics service, advertising SDK, tracking pixel, backend, or external API.</p>
     </section>
 
-    <section class="card">
+    <section class="doc-section">
       <h2>Data ClickCritter stores locally</h2>
       <ul>
         <li>Whether ClickCritter is enabled.</li>
@@ -168,27 +54,31 @@
       <p>These values remain in the user's local Chrome profile.</p>
     </section>
 
-    <section class="card">
+    <section class="doc-section">
       <h2>Data ClickCritter does not collect or store</h2>
       <ul>
-        <li>Browsing history or website URLs.</li>
-        <li>Page titles or page contents.</li>
+        <li>Browsing history.</li>
+        <li>Website URLs.</li>
+        <li>Page titles.</li>
+        <li>Page contents.</li>
         <li>Search queries.</li>
-        <li>Text typed into websites or form values.</li>
-        <li>Passwords or cookies.</li>
+        <li>Text typed into websites.</li>
+        <li>Form values.</li>
+        <li>Passwords.</li>
+        <li>Cookies.</li>
         <li>Advertising identifiers.</li>
         <li>Personal account information.</li>
         <li>Precise physical mouse distance.</li>
       </ul>
     </section>
 
-    <section class="card">
+    <section class="doc-section">
       <h2>Network activity</h2>
       <p>ClickCritter makes no analytics, telemetry, advertising, tracking, or application-data requests to external servers. It has no backend service and does not transmit cursor activity, settings, statistics, XP, or achievements away from the browser.</p>
       <p>All runtime JavaScript and required visual assets are packaged with the extension. ClickCritter does not execute remotely hosted code.</p>
     </section>
 
-    <section class="card">
+    <section class="doc-section">
       <h2>Why ClickCritter runs on webpages</h2>
       <p>The extension's content script runs on ordinary <code>http://</code> and <code>https://</code> webpages so it can:</p>
       <ul>
@@ -202,32 +92,40 @@
       <p>Chrome blocks ordinary content scripts on protected locations such as <code>chrome://</code> pages, the Chrome Web Store, and other restricted browser pages. ClickCritter handles those locations gracefully.</p>
     </section>
 
-    <section class="card">
+    <section class="doc-section">
       <h2>Data sharing</h2>
       <p>ClickCritter does not sell, rent, share, or transmit user data to third parties.</p>
     </section>
 
-    <section class="card">
+    <section class="doc-section">
       <h2>Data retention and deletion</h2>
       <p>Saved ClickCritter settings and statistics remain in the local Chrome profile until the user clears the extension's data or uninstalls the extension. Uninstalling the extension removes its local extension storage according to Chrome's normal behavior.</p>
     </section>
 
-    <section class="card">
+    <section class="doc-section">
       <h2>Third parties</h2>
       <p>ClickCritter does not include third-party analytics, advertising SDKs, tracking pixels, remote fonts, or third-party executable code.</p>
     </section>
 
-    <section class="card">
+    <section class="doc-section">
       <h2>Chrome Web Store Limited Use</h2>
       <p>ClickCritter's use of information is limited to providing its disclosed single purpose and user-facing features. Its use of information complies with the Chrome Web Store User Data Policy, including the Limited Use requirements.</p>
     </section>
 
-    <section class="card">
+    <section class="doc-section">
       <h2>Changes to this policy</h2>
       <p>If a future ClickCritter release changes its data practices, this policy and the Chrome Web Store disclosures will be updated before that release is published.</p>
     </section>
-
-    <footer>ClickCritter Privacy Policy · Version 1.0.0</footer>
   </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-inner">
+      <div>ClickCritter Privacy Policy · Version 1.0.0</div>
+      <div class="footer-links">
+        <a href="../">Home</a>
+        <a href="../support/">Support</a>
+      </div>
+    </div>
+  </footer>
 </body>
 </html>
