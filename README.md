@@ -1,10 +1,15 @@
 # Simplify 4 Me Website
 
-This repository contains the landing page for the Simplify 4 Me Chrome Extension.
+Official website for **Simplify 4 Me — Reading Assistant**, a privacy-first Chrome extension that makes difficult webpages easier to read and understand.
 
-## Hosting on GitHub Pages
+The site is hosted with GitHub Pages from the `main` branch and includes:
 
-1. Create a public repo named `simplify4me-site`.
-2. Upload these files to the repo root.
-3. Go to Settings → Pages → Source: `main` branch → `/ (root)`.
-4. Your site will be live at: https://<username>.github.io/simplify4me-site/
+- Product homepage
+- Privacy policy
+- Support / FAQ
+- Changelog
+- Local CSS and JavaScript assets
+
+Chrome Web Store: https://chromewebstore.google.com/detail/simplify-4-me/bjlihlijciaopbcjojkpcebmlffoicio
+
+The `clickcritter/` directory is a separate project and should remain intact.
