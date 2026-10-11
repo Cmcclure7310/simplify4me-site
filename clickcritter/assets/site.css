@@ -396,3 +396,4 @@ code {
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition: none !important; }
 }
+.doc-section, .doc-header { overflow-wrap: anywhere; }
